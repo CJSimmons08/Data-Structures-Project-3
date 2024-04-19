@@ -13,4 +13,11 @@ public class StudentTest {
 
     // your tests go here
 
+    @Test
+    public void testFiveByFiveOneObstacle(){
+        assertTimeout(Duration.ofMillis(1000), () -> {
+            Utilities.test("./test/inputs/firstTest.in");
+        });
+    }
+
 }
