@@ -14,9 +14,31 @@ public class StudentTest {
     // your tests go here
 
     @Test
-    public void testFiveByFiveOneObstacle(){
+    public void testFiveByFiveOneWire(){
         assertTimeout(Duration.ofMillis(1000), () -> {
             Utilities.test("./test/inputs/firstTest.in");
+        });
+    }
+
+    @Test
+    public void testFiveByFiveTwoWires(){
+        assertTimeout(Duration.ofMillis(1000), () -> {
+            Utilities.test("./test/inputs/secondTest.in");
+        });
+    }
+
+    @Test
+    public void testTenByTenTwoWires(){
+        assertTimeout(Duration.ofMillis(1000), () -> {
+            Utilities.test("./test/inputs/thirdTest.in");
+        });
+    }
+
+    @Test
+    public void testTenByTenThreeWires(){
+        //Notably the third wire has the same destination as its source
+        assertTimeout(Duration.ofMillis(1000), () -> {
+            Utilities.test("./test/inputs/fourthTest.in");
         });
     }
 

@@ -81,6 +81,8 @@ public class Routing {
             Wire currWire = new Wire(currentEndpoints.id, currentPath);
             paths.add(currWire);
             board.placeWire(currWire);
+            parent.clear();
+            visited.clear();
         }
 
 
