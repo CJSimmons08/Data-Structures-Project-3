@@ -42,4 +42,18 @@ public class StudentTest {
         });
     }
 
+    @Test
+    public void testFortyByFortyTenWires(){
+        assertTimeout(Duration.ofMillis(1000), () -> {
+            Utilities.test("./test/inputs/fortyByFortyTest.in");
+        });
+    }
+
+    @Test
+    public void testRemoveBlockingWires(){
+        assertTimeout(Duration.ofMillis(1000), () -> {
+            Utilities.test("./test/inputs/blockingWires.in");
+        });
+    }
+
 }

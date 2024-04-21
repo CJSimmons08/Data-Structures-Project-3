@@ -16,18 +16,20 @@ public class Routing {
         //at a time before each "wire" is finalized then added to this list
         ArrayList<Wire> paths = new ArrayList<>();
 
-        /*
-        * If visited continues causing problems. might have to come up with
-        * a way to just set Coord's values to some int (maybe -2? for not visited
-        * and -3 for visited?)
-        */
+
         Map<Coord, Boolean> visited = new HashMap<>();
         Map<Coord, Coord> parent = new HashMap<>();
-
-
+        Map<Coord, Integer> illegalCoords = new HashMap<>();
 
 
         for(Endpoints currentEndpoints : goals){
+            if(currentEndpoints.start.equals(currentEndpoints.end)){
+                ArrayList<Coord> selfList = new ArrayList<>();
+                selfList.add(currentEndpoints.start);
+                Wire selfWire = new Wire(currentEndpoints.id, selfList);
+                paths.add(selfWire);
+                continue;
+            }
             /*
             * BFS Loop:
             */
@@ -37,23 +39,27 @@ public class Routing {
             visited.put(currentEndpoints.start, true);
             while (!Q.isEmpty()) {
                 Coord u = Q.remove();
+                visited.putIfAbsent(u, true);
                 for(Coord coord : board.adj(u)){
                     visited.putIfAbsent(coord, false);
                 }
                 for (Coord adjCoord : board.adj(u)) {
                     if (!visited.get(adjCoord)) {
-                        /*
-                        * Need to figure out when to update a Coord's value
-                        * so that the board.isOccupied check is real and useful
-                        */
                         if(board.isObstacle(adjCoord) ||
                                 (board.isOccupied(adjCoord) &&
                                         board.getValue(adjCoord) != currentEndpoints.id)){
                             continue;
                         }
+                        /*if(board.isObstacle(adjCoord) || illegalCoords.get(adjCoord) == currentEndpoints.id){
+                            continue;
+                        }*/
                         parent.put(adjCoord, u);
                         Q.add(adjCoord);
                         visited.put(adjCoord, true);
+                        if(board.getValue(adjCoord) == currentEndpoints.id){
+                            Q.clear();
+                            break;
+                        }
                     }
                 }
             }
@@ -62,15 +68,8 @@ public class Routing {
             */
 
             /*
-            * Following code creates a list that acts as the path for the wire
-            * connecting the start and end of the "currentEndpoints". Does so by
-            * starting at the end Node, then looping through the "parent" list,
-            * adding the parent of each node to the beginning of the list. Which
-            * means in the end, the "currentPath" list starts with the "currentEndpoints.start" node
-            * and ends with the "currentEndpoints.end" node, with the in between values being the path.
-            * That path is then used to create a Wire which is then added to the "paths" list
+            * Loop that creates list for wire path
             */
-
             Coord currNode = currentEndpoints.end;
             List<Coord> currentPath = new ArrayList<>();
             currentPath.add(currNode);
@@ -78,9 +77,39 @@ public class Routing {
                 currNode = parent.get(currNode);
                 currentPath.add(0, currNode);
             }
+
+            /*for(Coord coord : currentPath){
+                if(board.isOccupied(parent.get(coord))){
+                    for (Wire path : paths) {
+                        if (path.id == board.getValue(parent.get(coord))) {
+                            illegalCoords.putIfAbsent(parent.get(coord), currentEndpoints.id);
+                            Endpoints endpoint = new Endpoints(path.id, path.start(), path.end());
+                            *//*badEndpoints.add(0, endpoint);*//*
+                            goals.remove(currentEndpoints);
+                            board.removeWire(path);
+                            goals.add(endpoint);
+                            System.out.println("Wire " + path.id + " removed.");
+                            System.out.println("Board: ");
+                            board.show();
+                            break;
+                        }
+                    }
+                }
+            }*/
+            /*System.out.println("Wire being placed: " + currentEndpoints.id);
+            System.out.println("Board: ");
+            board.show();*/
+
+
             Wire currWire = new Wire(currentEndpoints.id, currentPath);
             paths.add(currWire);
             board.placeWire(currWire);
+
+            /*Test Prints*/
+            /*System.out.println("Current Endpoints: " + currentEndpoints.id);
+            System.out.println("Board: ");
+            board.show();*/
+
             parent.clear();
             visited.clear();
         }
@@ -96,4 +125,41 @@ public class Routing {
         return paths;
     }
 
+
+    /*
+     * Following code creates a list that acts as the path for the wire
+     * connecting the start and end of the "currentEndpoints". Does so by
+     * starting at the end Node, then looping through the "parent" list,
+     * adding the parent of each node to the beginning of the list. Which
+     * means in the end, the "currentPath" list starts with the "currentEndpoints.start" node
+     * and ends with the "currentEndpoints.end" node, with the in between values being the path.
+     * That path is then used to create a Wire which is then added to the "paths" list
+     */
+
+
+    /*
+    * Potentially useful for later code:
+    */
+
+    /*ArrayList<Endpoints> badEndpoints = new ArrayList<>();*/
+
+    /*if(board.isObstacle(adjCoord)){
+                            continue;
+                        }*/
+
+    /*if(board.isOccupied(parent.get(currNode))){
+                    for (Wire path : paths) {
+                        if (path.id == board.getValue(parent.get(currNode))) {
+                            Endpoints endpoint = new Endpoints(path.id, path.start(), path.end());
+                            badEndpoints.add(endpoint);
+                            board.removeWire(path);
+                            break;
+                        }
+                    }
+                }*/
+
+    /*if(!badEndpoints.isEmpty()){
+            ArrayList<Wire> badPaths = findPaths(board, badEndpoints);
+            paths.addAll(badPaths);
+        }*/
 }
