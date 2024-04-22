@@ -1,3 +1,4 @@
+import javax.crypto.EncryptedPrivateKeyInfo;
 import java.util.*;
 
 public class Routing {
@@ -12,17 +13,21 @@ public class Routing {
     public static ArrayList<Wire>
     findPaths(Board board, ArrayList<Endpoints> goals) {
 
-        //Might need another auxiliary data structure to keep track of each list of coords
-        //at a time before each "wire" is finalized then added to this list
         ArrayList<Wire> paths = new ArrayList<>();
 
 
         Map<Coord, Boolean> visited = new HashMap<>();
         Map<Coord, Coord> parent = new HashMap<>();
-        Map<Coord, Integer> illegalCoords = new HashMap<>();
 
 
-        for(Endpoints currentEndpoints : goals){
+        ArrayList<Endpoints> sortedGoals = (ArrayList<Endpoints>) goals.clone();
+        sortedGoals.sort(Routing::shorterHypotenuse);
+
+
+        /*
+        * Find/Create Paths Loop:
+        */
+        for(Endpoints currentEndpoints : sortedGoals){
             if(currentEndpoints.start.equals(currentEndpoints.end)){
                 ArrayList<Coord> selfList = new ArrayList<>();
                 selfList.add(currentEndpoints.start);
@@ -50,9 +55,6 @@ public class Routing {
                                         board.getValue(adjCoord) != currentEndpoints.id)){
                             continue;
                         }
-                        /*if(board.isObstacle(adjCoord) || illegalCoords.get(adjCoord) == currentEndpoints.id){
-                            continue;
-                        }*/
                         parent.put(adjCoord, u);
                         Q.add(adjCoord);
                         visited.put(adjCoord, true);
@@ -78,88 +80,21 @@ public class Routing {
                 currentPath.add(0, currNode);
             }
 
-            /*for(Coord coord : currentPath){
-                if(board.isOccupied(parent.get(coord))){
-                    for (Wire path : paths) {
-                        if (path.id == board.getValue(parent.get(coord))) {
-                            illegalCoords.putIfAbsent(parent.get(coord), currentEndpoints.id);
-                            Endpoints endpoint = new Endpoints(path.id, path.start(), path.end());
-                            *//*badEndpoints.add(0, endpoint);*//*
-                            goals.remove(currentEndpoints);
-                            board.removeWire(path);
-                            goals.add(endpoint);
-                            System.out.println("Wire " + path.id + " removed.");
-                            System.out.println("Board: ");
-                            board.show();
-                            break;
-                        }
-                    }
-                }
-            }*/
-            /*System.out.println("Wire being placed: " + currentEndpoints.id);
-            System.out.println("Board: ");
-            board.show();*/
-
-
             Wire currWire = new Wire(currentEndpoints.id, currentPath);
             paths.add(currWire);
             board.placeWire(currWire);
-
-            /*Test Prints*/
-            /*System.out.println("Current Endpoints: " + currentEndpoints.id);
-            System.out.println("Board: ");
-            board.show();*/
 
             parent.clear();
             visited.clear();
         }
 
-
-
-        /*
-        NOTE TO SELF:
-            eventually will want to figure out how to "experiment with improvements to BFS"
-            or "alternative algorithms"
-        */
-
         return paths;
     }
 
+    public static int shorterHypotenuse(Endpoints a, Endpoints b){
+        double distanceA = (Math.pow((a.start.row - a.end.row), 2) + Math.pow((a.start.column - a.end.column), 2));
+        double distanceB = (Math.pow((b.start.row - b.end.row), 2) + Math.pow((b.start.column - b.end.column), 2));
+        return Double.compare(distanceA, distanceB);
+    }
 
-    /*
-     * Following code creates a list that acts as the path for the wire
-     * connecting the start and end of the "currentEndpoints". Does so by
-     * starting at the end Node, then looping through the "parent" list,
-     * adding the parent of each node to the beginning of the list. Which
-     * means in the end, the "currentPath" list starts with the "currentEndpoints.start" node
-     * and ends with the "currentEndpoints.end" node, with the in between values being the path.
-     * That path is then used to create a Wire which is then added to the "paths" list
-     */
-
-
-    /*
-    * Potentially useful for later code:
-    */
-
-    /*ArrayList<Endpoints> badEndpoints = new ArrayList<>();*/
-
-    /*if(board.isObstacle(adjCoord)){
-                            continue;
-                        }*/
-
-    /*if(board.isOccupied(parent.get(currNode))){
-                    for (Wire path : paths) {
-                        if (path.id == board.getValue(parent.get(currNode))) {
-                            Endpoints endpoint = new Endpoints(path.id, path.start(), path.end());
-                            badEndpoints.add(endpoint);
-                            board.removeWire(path);
-                            break;
-                        }
-                    }
-                }*/
-
-    /*if(!badEndpoints.isEmpty()){
-            ArrayList<Wire> badPaths = findPaths(board, badEndpoints);
-            paths.addAll(badPaths);
-        }*/
 }

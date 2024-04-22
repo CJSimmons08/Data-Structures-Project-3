@@ -56,4 +56,11 @@ public class StudentTest {
         });
     }
 
+    @Test
+    public void testRemoveBlockingWiresPartTwo(){
+        assertTimeout(Duration.ofMillis(1000), () -> {
+            Utilities.test("./test/inputs/blockingWiresPartTwo.in");
+        });
+    }
+
 }
